@@ -14,7 +14,9 @@
     "url": "http://github.com/B3rn475/proxied-socket.git"
   },
   "dependencies": {
-      "util-extend": "*"
+    "util-extend": "*",
+    "ipv6": "*",
+    "jsbn": "*"
   },
   "engines": {"node":">=0.8.0"},
   "main": "./index.js"
