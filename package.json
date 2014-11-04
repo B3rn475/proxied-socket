@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "util-extend": "*",
-    "ipv6": "*",
-    "jsbn": "*"
+    "ipaddr.js": "*"
   },
   "engines": {"node":">=0.8.0"},
   "main": "./index.js"
