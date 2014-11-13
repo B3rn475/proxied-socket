@@ -1,22 +1,24 @@
 proxied-socket
 ==============
 
-This is a simple Server and Client wrapper for standard nodejs Socket Servers and Clients that allow to proxy requests in a transparent way.
+Proxies are commonly used to keep undisclosed the Server original IP address to the clients.
+Normal TCP level proxies have a big issue, they do even mask the Client IP address to the Server that just sees the Proxy IP address.
 
-Proxies are meant to mask the Server IP address to the Client that can just see the Proxy IP address.
-Normal TCP level proxies have a big issue, they do even mask the Client IP address to the Server that can just see the Proxy IP address.
+__proxied-socket__ is meant to solve this issue.
+To do so, __proxied-socket__ provides unobtrusive IP address forwarding support for Node.js sockets.
 
-proxied-socket is meant to solve this issue.
-It is composed of two parts the client and the server.
+
+It is composed of two components the __Client__ and the __Server__.
 
 Client
 ---
-At Client side (the proxy) before sending any data to the server you can use the API provided to add an header that contains the ip address of the remote Client.
+The Client side API allows to add an header that contains an IP address.
+Proxies can use it to forward the remote Client IP address.
 
 ```js
 var ps = require('proxied-socket'),
     net = require('net');
-    
+
 var remote = {port: 1234};
 
 var server = net.Server(function (client) {
@@ -30,8 +32,12 @@ server.listen(80);
 
 Server
 ---
-At the Server side you can wrap your listening Server (TCP, UnixSocket, TLS, HTTP or HTTPS) with the API provided.
-At each connection the API decodes the header and attaches the address to the socket.
+The Server side API allows to intercept the header present at the beginning of every connection and to attach the IP address present in it to relative socket.
+
+The are two methods:
+
+ - __attach__ that attaches the address as the property __originalAddress__
+ - __override__ (default) that moves the original __remoteAddress__ to the property __maskedAddress__ and attaches the address present in the header to the property __remoteAddress__
 
 ```js
 var ps = require('proxied-socket'),
@@ -43,14 +49,9 @@ var server = ps.Server(net.Server(function (client) { // you just need to wrap y
 {
     method: 'override'
 });
-server.listen(80);
+server.listen(1234);
 
 ```
 
-Without proxied-socket the server would always log the same address.
-With proxied-socket the server instead logs the real address of the remote client.
-
-The are two methods:
-    
- - __attach__ that attaches the address present in the header as the property __originalAddress__
- - __override__ (default) that moves the original __remoteAddress__ to the property __maskedAddress__ and attaches the address present in the header to the property __remoteAddress__
+Without __proxied-socket__ the server would always log the same address.
+With __proxied-socket__ the server instead logs the real address of the remote client.
