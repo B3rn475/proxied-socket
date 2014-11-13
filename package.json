@@ -1,6 +1,6 @@
 {
     "name": "proxied-socket",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "",
     "keywords": ["socket", "proxy"],
     "homepage": "https://github.com/B3rn475/proxied-socket",
