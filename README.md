@@ -1,5 +1,5 @@
 proxied-socket
-==============
+---
 
 Proxies are commonly used to keep undisclosed the Server original IP address to the clients.
 Normal TCP level proxies have a big issue, they do even mask the Client IP address to the Server that just sees the Proxy IP address.
