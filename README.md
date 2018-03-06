@@ -48,6 +48,7 @@ var server = ps.Server(net.Server(function (client) { // you just need to wrap y
 }),
 {
     method: 'override'
+    format: 'default',
 });
 server.listen(1234);
 
@@ -55,3 +56,14 @@ server.listen(1234);
 
 Without __proxied-socket__ the server would always log the same address.
 With __proxied-socket__ the server instead logs the real address of the remote client.
+
+
+Options
+---
+
+ - `method` - Controls the way that the "real" client address is retrieve. With the `"attach"` method, the address will be located at `client.originalAddress`. With the `'replace'` method, `client.remoteAddress` is overidden.
+ - `format` - Conrols the expected format of the client IP header. `'default'` is the internal format, `'haproxy'` is the HAProxy PROXY protocol V1.
+
+More information about HAProxy's PROXY protocol can be found below:
+
+https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
