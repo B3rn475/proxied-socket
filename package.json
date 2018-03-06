@@ -2,7 +2,10 @@
     "name": "proxied-socket",
     "version": "0.0.6",
     "description": "",
-    "keywords": ["socket", "proxy"],
+    "keywords": [
+        "socket",
+        "proxy"
+    ],
     "homepage": "https://github.com/B3rn475/proxied-socket",
     "author": {
         "name": "Carlo BERNASCHINA",
@@ -17,11 +20,22 @@
         "url": "http://github.com/B3rn475/proxied-socket.git"
     },
     "dependencies": {
-        "util-extend": "*",
-        "ipaddr.js": "*"
+        "ipaddr.js": "^1.6.0"
+    },
+    "devDependencies": {
+        "coveralls": "latest",
+        "istanbul": "latest",
+        "mocha": "latest",
+        "sinon": "^4.4.2",
+        "memory-streams": "^0.1.3"
     },
     "engines": {
-        "node": ">=0.8.0"
+        "node": ">= 4.0.0"
+    },
+    "scripts": {
+        "test": "mocha --recursive",
+        "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --recursive",
+        "coveralls": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
     },
     "main": "index.js"
 }
