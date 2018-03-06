@@ -45,6 +45,16 @@ The are two methods:
  - __attach__ that attaches the address as the property __originalAddress__
  - __override__ (default) that moves the original __remoteAddress__ to the property __maskedAddress__ and attaches the address present in the header to the property __remoteAddress__
 
+And two supported formats:
+
+ - __default__ is compatible with the `proxied-socket.Client`. If you are writing
+   both the proxy and server, this is the format to use. It is also the default
+   format.
+ - __haproxy__ is compatible with the HAProxy PROXY protocol V1. If you are
+   writing a server that will be load balanced by HAProxy, this is the format
+   you will want. More information about the PROXY protcol can be found at the
+   following link. https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+
 ```js
 var ps = require('proxied-socket'),
     net = require('net');
@@ -54,6 +64,7 @@ var server = ps.Server(net.Server(function (client) { // you just need to wrap y
 }),
 {
     method: 'override'
+    format: 'default',
 });
 server.listen(1234);
 
