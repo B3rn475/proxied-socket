@@ -58,8 +58,7 @@ Without __proxied-socket__ the server would always log the same address.
 With __proxied-socket__ the server instead logs the real address of the remote client.
 
 
-Server Options
----
+*Server Options*
 
  - `method` - Controls the way that the "real" client address is retrieved.
    With the `"attach"` method, the address will be located at `client.originalAddress`.
