@@ -47,4 +47,18 @@ describe('Client', function () {
         assert.ok(onConnection.calledWith('1.2.3.4'));
         assert.ok(!onHeaderError.called);
     });
+    it('should parse address (splitted)', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROX')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError);
+
+        parser.call(socket);
+        socket.append('Y TCP4 1.2.3.4 5.6.7.8 100 200\n');
+        parser.call(socket);
+
+        assert.ok(onConnection.calledOnce);
+        assert.ok(onConnection.calledWith('1.2.3.4'));
+        assert.ok(!onHeaderError.called);
+    });
 });
