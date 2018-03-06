@@ -7,5 +7,11 @@
  */
 "use strict";
 
-module.exports.Server = require('./lib/server');
-module.exports.Client = require('./lib/client');
+var Server = require('./lib/server'),
+    Client = require('./lib/client');
+
+module.exports.Server = Server;
+module.exports.Client = Client;
+
+module.exports.wrapServer = Server;
+module.exports.wrapClient = Client;
