@@ -58,12 +58,20 @@ Without __proxied-socket__ the server would always log the same address.
 With __proxied-socket__ the server instead logs the real address of the remote client.
 
 
-Options
+Server Options
 ---
 
- - `method` - Controls the way that the "real" client address is retrieve. With the `"attach"` method, the address will be located at `client.originalAddress`. With the `'replace'` method, `client.remoteAddress` is overidden.
- - `format` - Conrols the expected format of the client IP header. `'default'` is the internal format, `'haproxy'` is the HAProxy PROXY protocol V1.
+ - `method` - Controls the way that the "real" client address is retrieved.
+   With the `"attach"` method, the address will be located at `client.originalAddress`.
+   With the `'replace'` method, `client.remoteAddress` is overidden.
+ - `format` - Conrols the expected format of the client IP header. `'default'`
+   is the internal (proxied-socket) format, `'haproxy'` is the HAProxy PROXY
+   protocol V1.
 
-More information about HAProxy's PROXY protocol can be found below:
+If you are writing both the proxy, and server that it serves, the internal
+format is preferred. If you are writing a service to be served by HAProxy,
+you will need to use the `'haproxy'` format, and to enable the PROXY protcol
+in your haproxy configuration. More information about HAProxy's PROXY protocol
+can be found below:
 
 https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
