@@ -39,6 +39,18 @@ The are two methods:
  - __attach__ that attaches the address as the property __originalAddress__
  - __override__ (default) that moves the original __remoteAddress__ to the property __maskedAddress__ and attaches the address present in the header to the property __remoteAddress__
 
+And two supported formats:
+
+ - __default__ is compatible with the `proxied-socket.Client`. If you are writing
+   both the proxy and server, this is the format to use. It is also the default
+   format.
+ - __haproxy__ is compatible with the HAProxy PROXY protocol V1. If you are
+   writing a server that will be load balanced by HAProxy, this is the format
+   you will want. More information about the PROXY protcol can be found at the
+   link below.
+
+https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+
 ```js
 var ps = require('proxied-socket'),
     net = require('net');
@@ -56,21 +68,3 @@ server.listen(1234);
 
 Without __proxied-socket__ the server would always log the same address.
 With __proxied-socket__ the server instead logs the real address of the remote client.
-
-
-**Server Options**
-
- - `method` - Controls the way that the "real" client address is retrieved.
-   With the `"attach"` method, the address will be located at `client.originalAddress`.
-   With the `'replace'` method, `client.remoteAddress` is overidden.
- - `format` - Conrols the expected format of the client IP header. `'default'`
-   is the internal (proxied-socket) format, `'haproxy'` is the HAProxy PROXY
-   protocol V1.
-
-If you are writing both the proxy, and server that it serves, the internal
-format is preferred. If you are writing a service to be served by HAProxy,
-you will need to use the `'haproxy'` format, and to enable the PROXY protcol
-in your haproxy configuration. More information about HAProxy's PROXY protocol
-can be found below:
-
-https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
