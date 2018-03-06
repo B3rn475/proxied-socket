@@ -47,9 +47,7 @@ And two supported formats:
  - __haproxy__ is compatible with the HAProxy PROXY protocol V1. If you are
    writing a server that will be load balanced by HAProxy, this is the format
    you will want. More information about the PROXY protcol can be found at the
-   link below.
-
-https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+   following link. https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
 
 ```js
 var ps = require('proxied-socket'),
