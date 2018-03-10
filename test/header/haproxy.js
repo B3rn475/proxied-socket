@@ -35,6 +35,17 @@ describe('Client', function () {
         assert.ok(!onConnection.called);
         assert.ok(onHeaderError.calledOnce);
     });
+    it('should reject invalid proto', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROXY FOOBAR 1.2.3.4 5.6.7.8 100 200\n')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError);
+
+        parser.call(socket);
+
+        assert.ok(!onConnection.called);
+        assert.ok(onHeaderError.calledOnce);
+    });
     it('should parse address (IPv4)', function () {
         var socket = new streams.ReadableStream(new Buffer('PROXY TCP4 1.2.3.4 5.6.7.8 100 200\n')),
             onConnection = sinon.spy(),
