@@ -132,7 +132,6 @@ describe('Client', function () {
         assert.equal(proxy.remotePort, 4113);
         assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
         assert.equal(proxy.localPort, 8739);
-        assert.ok(onConnection.calledWith());
     });
     it('should parse IPv6 splitted', function () {
         var socket = new streams.ReadableStream(new Buffer([37])),
@@ -162,7 +161,6 @@ describe('Client', function () {
         assert.equal(proxy.remotePort, 4113);
         assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
         assert.equal(proxy.localPort, 8739);
-        assert.ok(onConnection.calledWith());
     });
     it('should reject invalid IPv6 packets', function () {
         var socket = new streams.ReadableStream(new Buffer([2, 1, 0])),
