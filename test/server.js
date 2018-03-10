@@ -408,11 +408,38 @@ describe('Server', function () {
                 addEventListener: sinon.spy(),
                 removeListener: sinon.spy()
             },
-            overrideAddress = 'overrideAddress',
-            realAddress = 'realAddress';
+            overrideRemoteFamily = 'overrideRemoteFamily',
+            overrideRemoteAddress = 'overrideRemoteAddress',
+            overrideRemotePort = 0,
+            overrideLocalAddress = 'overrideLocalAddress',
+            overrideLocalPort = 1,
+            realRemoteFamily = 'realRemoteFamily',
+            realRemoteAddress = 'realRemoteAddress',
+            realRemotePort = 0,
+            realLocalAddress = 'realLocalAddress',
+            realLocalPort = 1,
+            proxy = {
+                remoteFamily: overrideRemoteFamily,
+                remoteAddress: overrideRemoteAddress,
+                remotePort: overrideRemotePort,
+                localAddress: overrideLocalAddress,
+                localPort: overrideLocalPort
+            };
 
+        socket.__defineGetter__('remoteFamily', function () {
+            return realRemoteFamily;
+        });
         socket.__defineGetter__('remoteAddress', function () {
-            return realAddress;
+            return realRemoteAddress;
+        });
+        socket.__defineGetter__('remotePort', function () {
+            return realRemotePort;
+        });
+        socket.__defineGetter__('localAddress', function () {
+            return realLocalAddress;
+        });
+        socket.__defineGetter__('localPort', function () {
+            return realLocalPort;
         });
 
         wrap(server, {
@@ -447,15 +474,28 @@ describe('Server', function () {
         assert.ok(parser.calledTwice);
         assert.ok(!serverEmit.called);
 
-        format.getCall(0).args[1].call(null, overrideAddress);
+        format.getCall(0).args[1].call(null, proxy);
 
         assert.ok(format.calledOnce);
         assert.ok(parser.calledTwice);
         assert.ok(serverEmit.calledWith('wrappedConnection', socket));
 
-        assert.equal(socket.remoteAddress, overrideAddress);
-        assert.equal(socket.maskedAddress, realAddress);
-        assert.equal(socket.originalAddress, undefined);
+        assert.equal(socket.remoteFamily, overrideRemoteFamily);
+        assert.equal(socket.remoteAddress, overrideRemoteAddress);
+        assert.equal(socket.remotePort, overrideRemotePort);
+        assert.equal(socket.localAddress, overrideLocalAddress);
+        assert.equal(socket.localPort, overrideLocalPort);
+        assert.equal(socket.maskedRemoteFamily, realRemoteFamily);
+        assert.equal(socket.maskedRemoteAddress, realRemoteAddress);
+        assert.equal(socket.maskedRemotePort, realRemotePort);
+        assert.equal(socket.maskedLocalAddress, realLocalAddress);
+        assert.equal(socket.maskedLocalPort, realLocalPort);
+        assert.equal(socket.originalRemoteFamily, undefined);
+        assert.equal(socket.originalRemoteAddress, undefined);
+        assert.equal(socket.originalRemotePort, undefined);
+        assert.equal(socket.originalLocalAddress, undefined);
+        assert.equal(socket.originalLocalPort, undefined);
+        assert.equal(socket.proxy, proxy);
     });
     it('should respect the format (attach)', function () {
         var serverOn = sinon.spy(),
@@ -477,11 +517,38 @@ describe('Server', function () {
                 addEventListener: sinon.spy(),
                 removeListener: sinon.spy()
             },
-            overrideAddress = 'overrideAddress',
-            realAddress = 'realAddress';
+            overrideRemoteFamily = 'overrideRemoteFamily',
+            overrideRemoteAddress = 'overrideRemoteAddress',
+            overrideRemotePort = 0,
+            overrideLocalAddress = 'overrideLocalAddress',
+            overrideLocalPort = 1,
+            realRemoteFamily = 'realRemoteFamily',
+            realRemoteAddress = 'realRemoteAddress',
+            realRemotePort = 0,
+            realLocalAddress = 'realLocalAddress',
+            realLocalPort = 1,
+            proxy = {
+                remoteFamily: overrideRemoteFamily,
+                remoteAddress: overrideRemoteAddress,
+                remotePort: overrideRemotePort,
+                localAddress: overrideLocalAddress,
+                localPort: overrideLocalPort
+            };
 
+        socket.__defineGetter__('remoteFamily', function () {
+            return realRemoteFamily;
+        });
         socket.__defineGetter__('remoteAddress', function () {
-            return realAddress;
+            return realRemoteAddress;
+        });
+        socket.__defineGetter__('remotePort', function () {
+            return realRemotePort;
+        });
+        socket.__defineGetter__('localAddress', function () {
+            return realLocalAddress;
+        });
+        socket.__defineGetter__('localPort', function () {
+            return realLocalPort;
         });
 
         wrap(server, {
@@ -516,14 +583,27 @@ describe('Server', function () {
         assert.ok(parser.calledTwice);
         assert.ok(!serverEmit.called);
 
-        format.getCall(0).args[1].call(null, overrideAddress);
+        format.getCall(0).args[1].call(null, proxy);
 
         assert.ok(format.calledOnce);
         assert.ok(parser.calledTwice);
         assert.ok(serverEmit.calledWith('wrappedConnection', socket));
 
-        assert.equal(socket.remoteAddress, realAddress);
-        assert.equal(socket.maskedAddress, undefined);
-        assert.equal(socket.originalAddress, overrideAddress);
+        assert.equal(socket.remoteFamily, realRemoteFamily);
+        assert.equal(socket.remoteAddress, realRemoteAddress);
+        assert.equal(socket.remotePort, realRemotePort);
+        assert.equal(socket.localAddress, realLocalAddress);
+        assert.equal(socket.localPort, realLocalPort);
+        assert.equal(socket.maskedRemoteFamily, undefined);
+        assert.equal(socket.maskedRemoteAddress, undefined);
+        assert.equal(socket.maskedRemotePort, undefined);
+        assert.equal(socket.maskedLocalAddress, undefined);
+        assert.equal(socket.maskedLocalPort, undefined);
+        assert.equal(socket.originalRemoteFamily, overrideRemoteFamily);
+        assert.equal(socket.originalRemoteAddress, overrideRemoteAddress);
+        assert.equal(socket.originalRemotePort, overrideRemotePort);
+        assert.equal(socket.originalLocalAddress, overrideLocalAddress);
+        assert.equal(socket.originalLocalPort, overrideLocalPort);
+        assert.equal(socket.proxy, proxy);
     });
 });

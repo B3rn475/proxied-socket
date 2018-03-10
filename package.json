@@ -11,6 +11,7 @@
         "name": "Carlo BERNASCHINA",
         "url": "http://www.bernaschina.com/"
     },
+    "license": "MIT",
     "licenses": {
         "type": "MIT",
         "url": "http://github.com/B3rn475/proxied-socket/raw/master/LICENSE"

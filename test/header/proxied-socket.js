@@ -47,40 +47,54 @@ describe('Client', function () {
         assert.ok(onHeaderError.calledOnce);
     });
     it('should parse IPv4', function () {
-        var socket = new streams.ReadableStream(new Buffer([5, 0, 1, 2, 3, 4])),
+        var socket = new streams.ReadableStream(new Buffer([13,  0,  0,  1,  2,
+                                                             3,  4,  5,  6,  7,
+                                                             8,  9, 10, 11])),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
-            parser = createParser(socket, onConnection, onHeaderError);
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
 
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('1.2.3.4'));
         assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv4');
+        assert.equal(proxy.remoteAddress, '0.1.2.3');
+        assert.equal(proxy.remotePort, 1029);
+        assert.equal(proxy.localAddress, '6.7.8.9');
+        assert.equal(proxy.localPort, 2571);
     });
     it('should parse IPv4 splitted', function () {
         var socket = new streams.ReadableStream(new Buffer([])),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
-            parser = createParser(socket, onConnection, onHeaderError);
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
 
         parser.call(socket);
-        socket.append(new Buffer([5]));
-        parser.call(socket);
-        socket.append(new Buffer([0]));
-        parser.call(socket);
-        socket.append(new Buffer([1]));
-        parser.call(socket);
-        socket.append(new Buffer([2]));
-        parser.call(socket);
-        socket.append(new Buffer([3]));
+        socket.append(new Buffer([13, 0, 0, 1, 2, 3]));
         parser.call(socket);
         socket.append(new Buffer([4]));
         parser.call(socket);
+        socket.append(new Buffer([5, 6]));
+        parser.call(socket);
+        socket.append(new Buffer([7, 8]));
+        parser.call(socket);
+        socket.append(new Buffer([9, 10, 11]));
+        parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('1.2.3.4'));
         assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv4');
+        assert.equal(proxy.remoteAddress, '0.1.2.3');
+        assert.equal(proxy.remotePort, 1029);
+        assert.equal(proxy.localAddress, '6.7.8.9');
+        assert.equal(proxy.localPort, 2571);
     });
     it('should reject invalid IPv4 packets', function () {
         var socket = new streams.ReadableStream(new Buffer([2, 0, 0])),
@@ -94,30 +108,61 @@ describe('Client', function () {
         assert.ok(onHeaderError.calledOnce);
     });
     it('should parse IPv6', function () {
-        var socket = new streams.ReadableStream(new Buffer([17, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])),
+        var socket = new streams.ReadableStream(new Buffer([37,  1,  0,  1,  2,
+                                                             3,  4,  5,  6,  7,
+                                                             8,  9, 10, 11, 12,
+                                                            13, 14, 15, 16, 17,
+                                                            18, 19, 20, 21, 22,
+                                                            23, 24, 25, 26, 27,
+                                                            28, 29, 30, 31, 32,
+                                                            33, 34, 35])),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
-            parser = createParser(socket, onConnection, onHeaderError);
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
 
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('102:304:506:708:90a:b0c:d0e:f10'));
         assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv6');
+        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
+        assert.equal(proxy.remotePort, 4113);
+        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
+        assert.equal(proxy.localPort, 8739);
+        assert.ok(onConnection.calledWith());
     });
     it('should parse IPv6 splitted', function () {
-        var socket = new streams.ReadableStream(new Buffer([17, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])),
+        var socket = new streams.ReadableStream(new Buffer([37])),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
-            parser = createParser(socket, onConnection, onHeaderError);
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
 
         parser.call(socket);
-        socket.append(new Buffer([16]));
+        socket.append(new Buffer([1]));
+        parser.call(socket);
+        socket.append(new Buffer([0, 1, 2, 3, 4, 5, 6, 7]));
+        parser.call(socket);
+        socket.append(new Buffer([8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
+        parser.call(socket);
+        socket.append(new Buffer([18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]));
+        parser.call(socket);
+        socket.append(new Buffer([29, 30, 31, 32, 33, 34, 35]));
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('102:304:506:708:90a:b0c:d0e:f10'));
         assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv6');
+        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
+        assert.equal(proxy.remotePort, 4113);
+        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
+        assert.equal(proxy.localPort, 8739);
+        assert.ok(onConnection.calledWith());
     });
     it('should reject invalid IPv6 packets', function () {
         var socket = new streams.ReadableStream(new Buffer([2, 1, 0])),
