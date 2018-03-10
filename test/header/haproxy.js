@@ -45,6 +45,7 @@ describe('Client', function () {
 
         assert.ok(onConnection.calledOnce);
         assert.ok(onConnection.calledWith('1.2.3.4'));
+        assert.ok(socket.proxyLine);
         assert.ok(!onHeaderError.called);
     });
     it('should parse address (splitted)', function () {
@@ -59,6 +60,7 @@ describe('Client', function () {
 
         assert.ok(onConnection.calledOnce);
         assert.ok(onConnection.calledWith('1.2.3.4'));
+        assert.ok(socket.proxyLine);
         assert.ok(!onHeaderError.called);
     });
 });
