@@ -35,30 +35,95 @@ describe('Client', function () {
         assert.ok(!onConnection.called);
         assert.ok(onHeaderError.calledOnce);
     });
-    it('should parse address', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROXY TCP4 1.2.3.4 5.6.7.8 100 200\n')),
+    it('should reject invalid proto', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROXY FOOBAR 1.2.3.4 5.6.7.8 100 200\n')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError);
 
         parser.call(socket);
 
-        assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('1.2.3.4'));
-        assert.ok(!onHeaderError.called);
+        assert.ok(!onConnection.called);
+        assert.ok(onHeaderError.calledOnce);
     });
-    it('should parse address (splitted)', function () {
+    it('should parse address (IPv4)', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROXY TCP4 1.2.3.4 5.6.7.8 100 200\n')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
+
+        parser.call(socket);
+
+        assert.ok(onConnection.calledOnce);
+        assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv4');
+        assert.equal(proxy.remoteAddress, '1.2.3.4');
+        assert.equal(proxy.remotePort, 100);
+        assert.equal(proxy.localAddress, '5.6.7.8');
+        assert.equal(proxy.localPort, 200);
+    });
+    it('should parse address (IPv6)', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROXY TCP6 1:203:405:607:809:a0b:c0d:e0f 1213:1415:1617:1819:1a1b:1c1d:1e1f:2021 101 201\n')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
+
+        parser.call(socket);
+
+        assert.ok(onConnection.calledOnce);
+        assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv6');
+        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
+        assert.equal(proxy.remotePort, 101);
+        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
+        assert.equal(proxy.localPort, 201);
+    });
+    it('should parse address (IPv4 splitted)', function () {
         var socket = new streams.ReadableStream(new Buffer('PROX')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
-            parser = createParser(socket, onConnection, onHeaderError);
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
 
         parser.call(socket);
         socket.append('Y TCP4 1.2.3.4 5.6.7.8 100 200\n');
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
-        assert.ok(onConnection.calledWith('1.2.3.4'));
         assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv4');
+        assert.equal(proxy.remoteAddress, '1.2.3.4');
+        assert.equal(proxy.remotePort, 100);
+        assert.equal(proxy.localAddress, '5.6.7.8');
+        assert.equal(proxy.localPort, 200);
+    });
+    it('should parse address (IPv6)', function () {
+        var socket = new streams.ReadableStream(new Buffer('PROXY TCP6 1:203:405:607:809:a0b:c0d:e0f')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
+
+        parser.call(socket);
+        socket.append(' 1213:1415:1617:1819:1a1b:1c1d:1e1f:2021 101 201\n');
+        parser.call(socket);
+
+        assert.ok(onConnection.calledOnce);
+        assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'IPv6');
+        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
+        assert.equal(proxy.remotePort, 101);
+        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
+        assert.equal(proxy.localPort, 201);
     });
 });

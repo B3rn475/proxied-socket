@@ -55,7 +55,7 @@ And two supported formats:
    you will want. More information about the PROXY protcol can be found at the
    following link. https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
 
-In both cases the full parsed header is attached to the __proxy__ property of the socket.
+In both cases the full parsed header is attached to the __proxyHeader__ property of the socket.
 
 ```js
 var ps = require('proxied-socket'),

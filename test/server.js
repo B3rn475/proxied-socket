@@ -495,7 +495,7 @@ describe('Server', function () {
         assert.equal(socket.originalRemotePort, undefined);
         assert.equal(socket.originalLocalAddress, undefined);
         assert.equal(socket.originalLocalPort, undefined);
-        assert.equal(socket.proxy, proxy);
+        assert.equal(socket.proxyHeader, proxy);
     });
     it('should respect the format (attach)', function () {
         var serverOn = sinon.spy(),
@@ -604,6 +604,6 @@ describe('Server', function () {
         assert.equal(socket.originalRemotePort, overrideRemotePort);
         assert.equal(socket.originalLocalAddress, overrideLocalAddress);
         assert.equal(socket.originalLocalPort, overrideLocalPort);
-        assert.equal(socket.proxy, proxy);
+        assert.equal(socket.proxyHeader, proxy);
     });
 });
