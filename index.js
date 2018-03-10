@@ -7,11 +7,8 @@
  */
 "use strict";
 
-var Server = require('./lib/server'),
-    Client = require('./lib/client');
+var wrapServer = require('./lib/server'),
+    sendHeader = require('./lib/client');
 
-module.exports.Server = Server;
-module.exports.Client = Client;
-
-module.exports.wrapServer = Server;
-module.exports.wrapClient = Client;
+module.exports.wrapServer = wrapServer;
+module.exports.sendHeader = sendHeader;

@@ -27,10 +27,10 @@ var ps = require('proxied-socket'),
 
 var remote = {port: 1234};
 
-var server = net.Server(function (client) {
-    var socket = net.connect(options, forwarded);
-    ps.Client(socket, client.remoteAddress); // you just need this
-    client.pipe(socket).pipe(client);
+var server = net.wrapServer(function (source) {
+    var target = net.connect(options, forwarded);
+    ps.sendHeader(source, target); // you just need this
+    source.pipe(target).pipe(source);
 });
 server.listen(80);
 
@@ -42,8 +42,8 @@ The Server side API allows to intercept the header present at the beginning of e
 
 The are two methods:
 
- - __attach__ that attaches the address as the property __originalAddress__
- - __override__ (default) that moves the original __remoteAddress__ to the property __maskedAddress__ and attaches the address present in the header to the property __remoteAddress__
+ - __attach__ which attaches the original socket information as the properties __originalRemoteFamily__, __originalRemoteAddress__, __originalRemotePort__, __originalLocalAddress__ and __originalLocalPort__
+ - __override__ (default) which moves the original socket information __remoteFamily__, __remoteAddress__, __remotePort__, __localAddress__ and __remotePorts__ to the respective property __maskedRemoteFamily__, __maskedRemoteAddress__, ... while replacing them with the information obtained from the header
 
 And two supported formats:
 
@@ -55,11 +55,13 @@ And two supported formats:
    you will want. More information about the PROXY protcol can be found at the
    following link. https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
 
+In both cases the full parsed header is attached to the __proxy__ property of the socket.
+
 ```js
 var ps = require('proxied-socket'),
     net = require('net');
 
-var server = ps.Server(net.Server(function (client) { // you just need to wrap your server
+var server = ps.wrapServer(net.Server(function (client) { // you just need to wrap your server
     console.log(client.remoteAddress);
 }),
 {
