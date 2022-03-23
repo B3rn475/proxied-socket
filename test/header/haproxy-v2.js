@@ -10,7 +10,7 @@
 
 var streams = require('memory-streams'),
     assert = require('assert'),
-    createParser = require('../../lib/server/header/proxy-v2'),
+    createParser = require('../../lib/server/header/haproxy-v2'),
     sinon = require('sinon');
 
 const PROXY_V2_HEADER = '0d0a0d0a000d0a515549540a21110021'
