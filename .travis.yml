@@ -1,11 +1,9 @@
-os:
-  - linux
-  - osx
+arch: arm64
+os: linux
 language: node_js
-node_js:
-  - "node"
-  - "9"
-  - "8"
-  - "6"
+node_js: lts/*
+branches:
+  only:
+  - master
 after_script:
   - npm run coveralls
