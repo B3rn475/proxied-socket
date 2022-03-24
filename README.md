@@ -50,10 +50,11 @@ And two supported formats:
  - __default__ is compatible with the `proxied-socket.Client`. If you are writing
    both the proxy and server, this is the format to use. It is also the default
    format.
- - __haproxy__ is compatible with the HAProxy PROXY protocol V1. If you are
-   writing a server that will be load balanced by HAProxy, this is the format
-   you will want. More information about the PROXY protcol can be found at the
-   following link. https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+ - __haproxy__ and __haproxy-v2__ are compatible with the HAProxy PROXY protocol
+   V1 and v2.If you are writing a server that will be load balanced by HAProxy,
+   this is the format you will want. More information about the PROXY protcol
+   can be found at the following link.
+   https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
 
 In both cases the full parsed header is attached to the __proxyHeader__ property of the socket.
 
