@@ -10,10 +10,15 @@
 
 var streams = require('memory-streams'),
     assert = require('assert'),
-    createParser = require('../../lib/server/header/haproxy'),
+    createParser = require('../../lib/server/header/haproxy-v2'),
     sinon = require('sinon');
 
-describe('Client: haproxy', function () {
+const PROXY_V2_HEADER = '0d0a0d0a000d0a515549540a21110021'
+const PROXY_V2_IPV6_HEADER = '0d0a0d0a000d0a515549540a21220039'
+const PROXY_V2_DATA = 'ac190001ac190003c200276805001262697374726f322e6661726c65792e6f7267'
+const PROXY_V2_IPV6_DATA = 'ac190001ac190001ac190001ac190001ac190003ac190003ac190003ac190003c200276805001262697374726f322e6661726c65792e6f7267'
+
+describe('Client: proxy_v2', function () {
     it('should be a function', function () {
         assert.equal(typeof createParser, 'function');
     });
@@ -25,7 +30,8 @@ describe('Client: haproxy', function () {
         assert.equal(typeof parser, 'function');
     });
     it('should reject invalid headers preamble', function () {
-        var socket = new streams.ReadableStream(new Buffer('FOOBAR TCP4 1.2.3.4 5.6.7.8 100 200\n')),
+        var invalid = '00' + PROXY_V2_HEADER.substring(0, 30);
+        var socket = new streams.ReadableStream(Buffer.from(invalid, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError);
@@ -36,7 +42,9 @@ describe('Client: haproxy', function () {
         assert.ok(onHeaderError.calledOnce);
     });
     it('should reject invalid proto', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROXY FOOBAR 1.2.3.4 5.6.7.8 100 200\n')),
+        // protocol is lower nibble of 0x0d byte.
+        var invalid = PROXY_V2_HEADER.substring(0, 11) + 'aa' + PROXY_V2_HEADER.substring(13);
+        var socket = new streams.ReadableStream(Buffer.from(invalid, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError);
@@ -47,7 +55,7 @@ describe('Client: haproxy', function () {
         assert.ok(onHeaderError.calledOnce);
     });
     it('should parse address (IPv4)', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROXY TCP4 1.2.3.4 5.6.7.8 100 200\n')),
+        var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_HEADER + PROXY_V2_DATA, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError),
@@ -60,13 +68,15 @@ describe('Client: haproxy', function () {
         assert.ok(onConnection.calledWith(sinon.match.object));
         proxy = onConnection.getCall(0).args[0];
         assert.equal(proxy.remoteFamily, 'IPv4');
-        assert.equal(proxy.remoteAddress, '1.2.3.4');
-        assert.equal(proxy.remotePort, 100);
-        assert.equal(proxy.localAddress, '5.6.7.8');
-        assert.equal(proxy.localPort, 200);
+        assert.equal(proxy.remoteAddress, '172.25.0.1');
+        assert.equal(proxy.remotePort, 49664);
+        assert.equal(proxy.localAddress, '172.25.0.3');
+        assert.equal(proxy.localPort, 10088);
+        assert.equal(proxy.tlv[0].type, 'UNIQUE_ID')
+        assert.equal(proxy.tlv[0].value, 'bistro2.farley.org')        
     });
     it('should parse address (IPv6)', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROXY TCP6 1:203:405:607:809:a0b:c0d:e0f 1213:1415:1617:1819:1a1b:1c1d:1e1f:2021 101 201\n')),
+        var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_IPV6_HEADER + PROXY_V2_IPV6_DATA, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError),
@@ -79,20 +89,22 @@ describe('Client: haproxy', function () {
         assert.ok(onConnection.calledWith(sinon.match.object));
         proxy = onConnection.getCall(0).args[0];
         assert.equal(proxy.remoteFamily, 'IPv6');
-        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
-        assert.equal(proxy.remotePort, 101);
-        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
-        assert.equal(proxy.localPort, 201);
+        assert.equal(proxy.remoteAddress, 'ac19:1:ac19:1:ac19:1:ac19:1');
+        assert.equal(proxy.remotePort, 49664);
+        assert.equal(proxy.localAddress, 'ac19:3:ac19:3:ac19:3:ac19:3');
+        assert.equal(proxy.localPort, 10088);
+        assert.equal(proxy.tlv[0].type, 'UNIQUE_ID')
+        assert.equal(proxy.tlv[0].value, 'bistro2.farley.org')        
     });
     it('should parse address (IPv4 splitted)', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROX')),
+        var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_HEADER, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError),
             proxy;
 
         parser.call(socket);
-        socket.append('Y TCP4 1.2.3.4 5.6.7.8 100 200\n');
+        socket.append(Buffer.from(PROXY_V2_DATA, 'hex'));
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
@@ -100,20 +112,22 @@ describe('Client: haproxy', function () {
         assert.ok(onConnection.calledWith(sinon.match.object));
         proxy = onConnection.getCall(0).args[0];
         assert.equal(proxy.remoteFamily, 'IPv4');
-        assert.equal(proxy.remoteAddress, '1.2.3.4');
-        assert.equal(proxy.remotePort, 100);
-        assert.equal(proxy.localAddress, '5.6.7.8');
-        assert.equal(proxy.localPort, 200);
+        assert.equal(proxy.remoteAddress, '172.25.0.1');
+        assert.equal(proxy.remotePort, 49664);
+        assert.equal(proxy.localAddress, '172.25.0.3');
+        assert.equal(proxy.localPort, 10088);
+        assert.equal(proxy.tlv[0].type, 'UNIQUE_ID')
+        assert.equal(proxy.tlv[0].value, 'bistro2.farley.org')        
     });
-    it('should parse address (IPv6)', function () {
-        var socket = new streams.ReadableStream(new Buffer('PROXY TCP6 1:203:405:607:809:a0b:c0d:e0f')),
+    it('should parse address (IPv6 splitted)', function () {
+        var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_IPV6_HEADER, 'hex')),
             onConnection = sinon.spy(),
             onHeaderError = sinon.spy(),
             parser = createParser(socket, onConnection, onHeaderError),
             proxy;
 
         parser.call(socket);
-        socket.append(' 1213:1415:1617:1819:1a1b:1c1d:1e1f:2021 101 201\n');
+        socket.append(Buffer.from(PROXY_V2_IPV6_DATA, 'hex'));
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
@@ -121,9 +135,11 @@ describe('Client: haproxy', function () {
         assert.ok(onConnection.calledWith(sinon.match.object));
         proxy = onConnection.getCall(0).args[0];
         assert.equal(proxy.remoteFamily, 'IPv6');
-        assert.equal(proxy.remoteAddress, '1:203:405:607:809:a0b:c0d:e0f');
-        assert.equal(proxy.remotePort, 101);
-        assert.equal(proxy.localAddress, '1213:1415:1617:1819:1a1b:1c1d:1e1f:2021');
-        assert.equal(proxy.localPort, 201);
+        assert.equal(proxy.remoteAddress, 'ac19:1:ac19:1:ac19:1:ac19:1');
+        assert.equal(proxy.remotePort, 49664);
+        assert.equal(proxy.localAddress, 'ac19:3:ac19:3:ac19:3:ac19:3');
+        assert.equal(proxy.localPort, 10088);
+        assert.equal(proxy.tlv[0].type, 'UNIQUE_ID')
+        assert.equal(proxy.tlv[0].value, 'bistro2.farley.org')        
     });
 });

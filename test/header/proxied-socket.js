@@ -13,7 +13,7 @@ var streams = require('memory-streams'),
     createParser = require('../../lib/server/header/proxied-socket'),
     sinon = require('sinon');
 
-describe('Client', function () {
+describe('Client: proxied-socket', function () {
     it('should be a function', function () {
         assert.equal(typeof createParser, 'function');
     });
