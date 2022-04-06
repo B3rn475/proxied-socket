@@ -69,6 +69,11 @@ describe('Client: proxy_v2', function () {
         assert.ok(!onHeaderError.called);
         assert.ok(onConnection.calledWith(sinon.match.object));
         proxy = onConnection.getCall(0).args[0];
+        assert.equal(proxy.remoteFamily, 'Unspecified');
+        assert.equal(proxy.remoteAddress, null);
+        assert.equal(proxy.remotePort, null);
+        assert.equal(proxy.localAddress, null);
+        assert.equal(proxy.localPort, null);
     });
     it('should parse address (IPv4)', function () {
         var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_HEADER + PROXY_V2_DATA, 'hex')),
