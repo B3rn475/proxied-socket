@@ -35,6 +35,7 @@
     },
     "scripts": {
         "test": "mocha --recursive",
+        "debug": "mocha --inspect-brk --recursive",
         "coverage": "nyc npm test",
         "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
     },

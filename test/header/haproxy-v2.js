@@ -13,6 +13,7 @@ var streams = require('memory-streams'),
     createParser = require('../../lib/server/header/haproxy-v2'),
     sinon = require('sinon');
 
+const PROXY_V2_MINIMAL = '0d0a0d0a000d0a515549540a20000000'
 const PROXY_V2_HEADER = '0d0a0d0a000d0a515549540a21110021'
 const PROXY_V2_IPV6_HEADER = '0d0a0d0a000d0a515549540a21220039'
 const PROXY_V2_DATA = 'ac190001ac190003c200276805001262697374726f322e6661726c65792e6f7267'
@@ -53,6 +54,21 @@ describe('Client: proxy_v2', function () {
 
         assert.ok(!onConnection.called);
         assert.ok(onHeaderError.calledOnce);
+    });
+    it('should handle minimal header', function () {
+        var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_MINIMAL + PROXY_V2_DATA, 'hex')),
+            onConnection = sinon.spy(),
+            onHeaderError = sinon.spy(),
+            parser = createParser(socket, onConnection, onHeaderError),
+            proxy;
+
+        debugger;
+        parser.call(socket);
+
+        assert.ok(onConnection.calledOnce);
+        assert.ok(!onHeaderError.called);
+        assert.ok(onConnection.calledWith(sinon.match.object));
+        proxy = onConnection.getCall(0).args[0];
     });
     it('should parse address (IPv4)', function () {
         var socket = new streams.ReadableStream(Buffer.from(PROXY_V2_HEADER + PROXY_V2_DATA, 'hex')),
