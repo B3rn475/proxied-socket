@@ -62,7 +62,6 @@ describe('Client: proxy_v2', function () {
             parser = createParser(socket, onConnection, onHeaderError),
             proxy;
 
-        debugger;
         parser.call(socket);
 
         assert.ok(onConnection.calledOnce);
